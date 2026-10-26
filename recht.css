@@ -17,5 +17,4 @@ h3{font-size:16px;margin:22px 0 6px}
 p,ul{margin:0 0 14px}ul{padding-left:20px}
 .card{padding:20px 22px;border:1px solid var(--line);border-radius:16px;background:#0b0710cc}
 .card p{margin:0}
-.todo{background:#e0a35a22;border:1px dashed #e0a35a;border-radius:4px;padding:0 4px;color:#f2c792}
 footer{border-top:1px solid #ffffff12;margin-top:60px;padding-block:24px;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}

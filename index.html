@@ -115,7 +115,6 @@ h2.h{font:700 clamp(26px,3.4vw,42px)/1.12 var(--display);margin:0;text-wrap:bala
 .dl h2{font:800 clamp(34px,6vw,80px)/1.02 var(--display);margin:14px auto 0;max-width:14ch;text-wrap:balance;text-shadow:0 4px 40px #000}
 .dl p{color:#cfc6de;max-width:52ch;margin:18px auto 30px}
 .files{display:grid;grid-template-columns:1fr;gap:14px;max-width:560px;margin:36px auto 0;text-align:left}
-@media(max-width:700px){.files{grid-template-columns:1fr}}
 .file{display:flex;flex-direction:column;gap:4px}
 .file dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:14px 0 18px;font-size:14px}
 .file dt{color:var(--muted)}.file dd{margin:0;font-family:var(--mono);font-size:13px;overflow-wrap:anywhere}
@@ -184,7 +183,7 @@ body.pre-intro .hero>*{transform:translateY(30px) scale(.94);filter:blur(8px)}
   <div class="bar t"></div><div class="bar b"></div>
   <svg viewBox="0 0 1100 200"><path class="ecg" d="M0 110 H330 l20 -12 l14 12 h40 l16 -90 l22 160 l18 -100 l12 30 h60 l14 -8 l12 8 H700 l20 -12 l14 12 h30 l16 -70 l22 120 l18 -70 h200"/></svg>
   <div class="word">PULSRIG</div>
-  <div class="sub">DEIN PC IM TAKT</div>
+  <div class="sub">DEIN PC IM PULS</div>
   <button type="button" id="skip">ÜBERSPRINGEN</button>
 </div>
 
@@ -327,7 +326,7 @@ body.pre-intro .hero>*{transform:translateY(30px) scale(.94);filter:blur(8px)}
     <p class="meta" style="margin-top:28px">auch erreichbar unter <code>pulsrig.com</code></p>
   </section>
 </main>
-<footer><div class="wrap"><span>© 2026 PulsRig · freie Software unter GPL-3.0</span><span><a href="https://ko-fi.com/pulsrig" target="_blank" rel="noopener">Unterstützen</a> · <a href="impressum.html">Impressum</a> ·<a href="datenschutz.html">Datenschutz</a></span></div></footer>
+<footer><div class="wrap"><span>© 2026 PulsRig · freie Software unter GPL-3.0</span><span><a href="https://ko-fi.com/pulsrig" target="_blank" rel="noopener">Unterstützen</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></span></div></footer>
 
 <script src="js/three.min.js"></script>
 <script src="js/CopyShader.js"></script>
@@ -499,31 +498,33 @@ if('IntersectionObserver' in window&&!still){
   document.querySelectorAll('.rv').forEach((el,i)=>{if(el.getBoundingClientRect().top>innerHeight){el.classList.add('pre');el.style.transitionDelay=(i%3)*70+'ms'}io.observe(el)});
 }
 
-/* ===== Hintergrundklang: Ambient-Lofi (erst nach Klick auf TON) ===== */
+/* ===== Hintergrundklang: ruhiges Ambient (erst nach Klick auf TON) ===== */
 var Sound=(function(){
-  const btn=document.getElementById('snd');let ac=null,master,tape,keys,drums,rv,on=false,next=0,step=0,timer=null,pScroll=0,wow;
+  const btn=document.getElementById('snd');let ac=null,master,tape,keys,drums,rv,tick,on=false,next=0,step=0,timer=null,pScroll=0,wow;
   const BEAT=.9,SW=0,t0=performance.now();
   const CH=[[50,57,60,64,65],[46,53,57,62,65],[41,48,57,60,67],[48,55,57,64,67]];
   const hz=m=>440*Math.pow(2,(m-69)/12);
-  function noiseBuf(sec){const b=ac.createBuffer(1,ac.sampleRate*sec,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
+  function noiseBuf(sec,ch=1){const b=ac.createBuffer(ch,ac.sampleRate*sec,ac.sampleRate);for(let k=0;k<ch;k++){const d=b.getChannelData(k);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return b}
   function init(){
     ac=new(window.AudioContext||window.webkitAudioContext)();
     master=ac.createGain();master.gain.value=0;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.ratio.value=3;
-    tape=ac.createBiquadFilter();tape.type='lowpass';tape.frequency.value=2600;tape.Q.value=.5;
+    tape=ac.createBiquadFilter();tape.type='lowpass';tape.frequency.value=7000;tape.Q.value=.5;
     master.connect(tape);tape.connect(comp);comp.connect(ac.destination);
-    rv=ac.createConvolver();{const n=ac.sampleRate*3.5,b=ac.createBuffer(2,n,ac.sampleRate);for(let k=0;k<2;k++){const d=b.getChannelData(k);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}rv.buffer=b}
-    const rvG=ac.createGain();rvG.gain.value=.45;rv.connect(rvG);rvG.connect(master);
+    rv=ac.createConvolver();{const n=ac.sampleRate*3.5,b=ac.createBuffer(2,n,ac.sampleRate);for(let k=0;k<2;k++){const d=b.getChannelData(k);let lp=0;for(let i=0;i<n;i++){lp+=((Math.random()*2-1)-lp)*(.5-.42*i/n);d[i]=lp*Math.exp(-i/n*5)}}rv.buffer=b}
+    // Hall wird nach hinten weicher und dunkler, damit er nicht rauscht
+    const rvF=ac.createBiquadFilter(),rvG=ac.createGain();rvF.type='lowpass';rvF.frequency.value=5000;rvG.gain.value=.5;rv.connect(rvF);rvF.connect(rvG);rvG.connect(master);
+    tick=noiseBuf(.4);
     keys=ac.createGain();keys.gain.value=.6;keys.connect(master);keys.connect(rv);
     drums=ac.createGain();drums.gain.value=.55;drums.connect(master);
     // Bandschwankung: alle Töne leiern leicht
-    wow=ac.createOscillator();wow.frequency.value=.35;const wg=ac.createGain();wg.gain.value=9;wow.connect(wg);wow.start();wow.out=wg;
+    wow=ac.createOscillator();wow.frequency.value=.35;const wg=ac.createGain();wg.gain.value=3;wow.connect(wg);wow.start();wow.out=wg;
     // Plattenknistern
     const cr=ac.createBufferSource(),cb=ac.createBuffer(1,ac.sampleRate*3,ac.sampleRate),cd=cb.getChannelData(0);
     for(let i=0;i<cd.length;i++)cd[i]=Math.random()<.0009?(Math.random()*2-1)*.8:(Math.random()*2-1)*.012;
-    cr.buffer=cb;cr.loop=true;const cf=ac.createBiquadFilter(),cg=ac.createGain();cf.type='highpass';cf.frequency.value=1500;cg.gain.value=.05;
+    cr.buffer=cb;cr.loop=true;const cf=ac.createBiquadFilter(),cg=ac.createGain();cf.type='highpass';cf.frequency.value=1500;cg.gain.value=.012;
     cr.connect(cf);cf.connect(cg);cg.connect(master);cr.start();
-    // Regenartiges Rauschen ganz leise
-    const air=ac.createBufferSource();air.buffer=noiseBuf(4);air.loop=true;const af=ac.createBiquadFilter(),ag=ac.createGain();af.type='lowpass';af.frequency.value=700;ag.gain.value=.018;
+    // Regenartiges Rauschen ganz leise, in Stereo
+    const air=ac.createBufferSource();air.buffer=noiseBuf(4,2);air.loop=true;const af=ac.createBiquadFilter(),ag=ac.createGain();af.type='lowpass';af.frequency.value=700;ag.gain.value=.012;
     air.connect(af);af.connect(ag);ag.connect(master);air.start();
   }
   function ep(when,m,v,len){ // E-Piano: Sinus mit kurzem Anschlag-Oberton
@@ -538,14 +539,14 @@ var Sound=(function(){
     b.connect(g);g.connect(master);b.start(when);b.stop(when+BEAT*8)}
   function kick(when,amp){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(90,when);o.frequency.exponentialRampToValueAtTime(40,when+.14);
     g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(amp,when+.01);g.gain.exponentialRampToValueAtTime(.001,when+.35);o.connect(g);g.connect(drums);o.start(when);o.stop(when+.4)}
-  function hit(when,freq,q,amp,dec,verb){const n=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();n.buffer=noiseBuf(.4);f.type='bandpass';f.frequency.value=freq;f.Q.value=q;
+  function hit(when,freq,q,amp,dec,verb){const n=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();n.buffer=tick;f.type='bandpass';f.frequency.value=freq;f.Q.value=q;
     g.gain.setValueAtTime(amp,when);g.gain.exponentialRampToValueAtTime(.001,when+dec);n.connect(f);f.connect(g);g.connect(drums);if(verb)g.connect(rv);n.start(when);n.stop(when+dec+.05)}
   function sched(){
     while(next<ac.currentTime+.25){
       const s=step%32,c=CH[Math.floor(step/32)%4],sw=(s%2)?SW:0,t=next+sw;
       if(s===0)chord(next,c);
       if(s%4===0){kick(next+.05*BEAT,.16);kick(next+.22*BEAT,.08)}
-      if(s%4===2)hit(next,3200,9,.035,.04,true);                          // leises Ticken wie eine Uhr          // Herzschlag wie im Bild
+      if(s%4===2)hit(next,3200,9,.035,.04,true);                          // leises Ticken wie eine Uhr
       if(s%4===2&&Math.random()<.18+pScroll*.2){const m=c[2+Math.floor(Math.random()*3)]+12;ep(t,m,.03,2.4)}
       next+=BEAT/4;step++;
     }
@@ -561,8 +562,8 @@ var Sound=(function(){
   btn.addEventListener('click',()=>on?stop():start());
   document.addEventListener('visibilitychange',()=>{if(!ac||!on)return;document.hidden?ac.suspend():ac.resume()});
   return{
-    set p(v){pScroll=v;if(ac)tape.frequency.setTargetAtTime(2200+v*1400,ac.currentTime,.5)},
-    scan(){if(!ac||!on)return;const t=ac.currentTime;tape.frequency.cancelScheduledValues(t);tape.frequency.setValueAtTime(700,t);tape.frequency.linearRampToValueAtTime(2200+pScroll*1400,t+1.4);
+    set p(v){pScroll=v;if(ac)tape.frequency.setTargetAtTime(6500+v*2500,ac.currentTime,.5)},
+    scan(){if(!ac||!on)return;const t=ac.currentTime;tape.frequency.cancelScheduledValues(t);tape.frequency.setValueAtTime(900,t);tape.frequency.linearRampToValueAtTime(6500+pScroll*2500,t+1.4);
       [74,77,81].forEach((m,i)=>ep(t+1.3+i*.09,m,.035,2))}
   };
 })();
