@@ -7,8 +7,7 @@
 <meta name="description" content="PulsRig sucht neuere Treiber, zeigt Temperaturen live und macht deinen Windows-PC fit fürs Spielen. Kostenlos und quelloffen (GPL-3.0).">
 <meta name="theme-color" content="#06030a">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 66 52'%3E%3Cpath d='M2 30h16l8-16 10 36 10-48 8 28h10' fill='none' stroke='%238c6bd6' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* Layout: eine durchgehende WebGL-Welt hinter der Seite – Herzmonitor-Ring im Zentrum einer Galaxie, die Kamera fliegt beim Scrollen hindurch. Inhalte schweben als Bento-Kacheln davor. */
 :root{
@@ -323,15 +322,15 @@ body.pre-intro .hero>*{transform:translateY(30px) scale(.94);filter:blur(8px)}
     <p class="meta" style="margin-top:28px">auch erreichbar unter <code>pulsrig.com</code></p>
   </section>
 </main>
-<footer><div class="wrap"><span>© 2026 PulsRig · freie Software unter GPL-3.0</span><span>pulsrig.de</span></div></footer>
+<footer><div class="wrap"><span>© 2026 PulsRig · freie Software unter GPL-3.0</span><span><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></span></div></footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="js/three.min.js"></script>
+<script src="js/CopyShader.js"></script>
+<script src="js/LuminosityHighPassShader.js"></script>
+<script src="js/EffectComposer.js"></script>
+<script src="js/RenderPass.js"></script>
+<script src="js/ShaderPass.js"></script>
+<script src="js/UnrealBloomPass.js"></script>
 <script>
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)), ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;

@@ -1,0 +1,8 @@
+Schriften (SIL Open Font License 1.1):
+- Unbounded, (c) The Unbounded Project Authors
+- IBM Plex Sans, (c) IBM Corp.
+- JetBrains Mono, (c) The JetBrains Mono Project Authors
+https://openfontlicense.org
+
+three.js r128 (MIT-Lizenz), (c) 2010-2021 Three.js Authors
+https://github.com/mrdoob/three.js/blob/r128/LICENSE
