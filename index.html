@@ -450,8 +450,13 @@ const World=(function(){
   addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
   let lastW=0,lastH=0;
   function size(){const w=innerWidth,h=innerHeight;
-    if(mob&&w===lastW&&Math.abs(h-lastH)<160)return; /* Adressleiste ein/aus: kein Neuaufbau */
-    lastW=w;lastH=h;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();comp&&comp.setSize(w,h);if(mob&&bloom)bloom.setSize(w/2,h/2);fit=Math.max(1,1.05/cam.aspect);K[0].pos.z=7*fit;K[K.length-1].pos.z=8*fit}
+    if(mob&&w===lastW&&Math.abs(h-lastH)<160)return place(); /* Adressleiste ein/aus: kein Neuaufbau */
+    lastW=w;lastH=h;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();comp&&comp.setSize(w,h);if(mob&&bloom)bloom.setSize(w/2,h/2);fit=Math.max(1,1.05/cam.aspect);K[0].pos.z=7*fit;K[K.length-1].pos.z=8*fit;place()}
+  /* Ringmitte auf die echte Mitte des SCAN-Knopfs legen (Startansicht: Kamera bei z=7*fit, Blick auf 0,0,0) */
+  const scanEl=document.getElementById('scan');let ringS=1;
+  function place(){if(!scanEl)return;let x=scanEl.offsetWidth/2,y=scanEl.offsetHeight/2;for(let e=scanEl;e;e=e.offsetParent){x+=e.offsetLeft;y+=e.offsetTop} /* offset statt Rect: Intro-Verschiebung zählt nicht */
+    const hy=Math.tan(cam.fov*Math.PI/360)*K[0].pos.z;ringS=scanEl.offsetWidth*.62/((R+.02)/hy*innerHeight/2);ring.position.set((x/innerWidth*2-1)*hy*cam.aspect,-(y/innerHeight*2-1)*hy,0)}
+  document.fonts&&document.fonts.ready.then(place);addEventListener('load',place);
   addEventListener('resize',size);size();
   function sample(p){let i=0;while(i<K.length-2&&p>K[i+1].p)i++;const a=K[i],b=K[i+1],t=ease(clamp((p-a.p)/(b.p-a.p),0,1));
     P.lerpVectors(a.pos,b.pos,t);L.lerpVectors(a.look,b.look,t)}
@@ -462,7 +467,7 @@ const World=(function(){
     const sp=(1/2.4/3)*(1+boost*3);ringU.uHead.value=(ringU.uHead.value+dt*sp)%1;ringU.uBoost.value=boost;
     head.position.copy(curve.getPoint(ringU.uHead.value));
     const ph=(t%.9)/.9,beat=Math.exp(-Math.pow((ph-.05)/.035,2))+.6*Math.exp(-Math.pow((ph-.22)/.045,2));
-    ring.scale.setScalar(1+beat*.008+boost*.03);core.material.opacity=.09+beat*.06+boost*.2;
+    ring.scale.setScalar(ringS*(1+beat*.008+boost*.03));core.material.opacity=.09+beat*.06+boost*.2;
     if(bloom)bloom.strength=1.0+beat*.08+boost*.45+vel*3;
     waves.forEach((m,i)=>{m.userData.t+=dt;const k=m.userData.t/1.6;m.scale.setScalar(1+k*5);m.material.opacity=Math.max(0,1-k)*.35;if(k>=1){ring.remove(m);waves.splice(i,1)}});
     gt+=dt*(1+boost*.8);galU.uTime.value=gt+prog*30;galU.uWarp.value=vel*8;
