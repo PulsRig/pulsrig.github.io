@@ -170,6 +170,27 @@ body.pre-intro .hero>*{transform:translateY(30px) scale(.94);filter:blur(8px)}
 .rv.pre{transform:translateY(30px)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}#intro{display:none}.rv.pre{transform:none}
   .chapters{height:auto}.pin{position:static;height:auto;display:grid;gap:80px;padding-block:80px}.chap{position:static}.chap:not(.on){opacity:1;transform:none;filter:none}.prog,.num{display:none}}
+
+/* Handy */
+@supports(height:100svh){.pin{height:100svh}}
+@media(max-width:700px){
+  header .wrap{padding-block:10px}
+  nav{gap:8px}
+  nav .pill{min-height:44px;display:inline-flex;align-items:center;padding-inline:14px}
+  .logo{min-height:44px}
+  .hero{min-height:560px;padding-block:28px 24px}
+  .chap{left:0;right:0;max-width:none;padding-inline:20px}
+  .chap h2{font-size:clamp(30px,9.5vw,44px);line-height:1.05}
+  .prog{bottom:calc(28px + env(safe-area-inset-bottom,0px))}
+  section.blk{padding-block:64px}
+  .dl{padding-block:80px 96px}
+  .warn{padding:20px;gap:22px}
+  .ss{transform:none}
+  .support .btn,.dl .btn{justify-content:center}
+  footer{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}
+  footer .wrap{flex-direction:column}
+  footer a{display:inline-flex;align-items:center;min-height:44px}
+}
 </style>
 </head>
 <body>
@@ -343,8 +364,10 @@ const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)), ease=t=>t<.5?4*t*t*t:1-Math.pow(
 const World=(function(){
   if(!window.THREE)return null;
   const cv=document.getElementById('gl');
-  const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
-  r.setPixelRatio(Math.min(devicePixelRatio,1.75));
+  /* Handys: weniger Teilchen, kleinere Auflösung, Bloom in halber Größe */
+  const mob=matchMedia('(max-width:700px),(pointer:coarse)').matches;
+  const r=new THREE.WebGLRenderer({canvas:cv,antialias:!mob,alpha:true,powerPreference:'high-performance'});
+  r.setPixelRatio(Math.min(devicePixelRatio,mob?1.25:1.75));
   const scene=new THREE.Scene();
   scene.fog=new THREE.FogExp2(0x06030a,.028);
   const cam=new THREE.PerspectiveCamera(42,1,.05,300);
@@ -378,7 +401,7 @@ const World=(function(){
   function wave(){const m=new THREE.Mesh(new THREE.RingGeometry(R,R+.04,160),new THREE.MeshBasicMaterial({color:0xc9bbf0,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));m.userData.t=0;ring.add(m);waves.push(m)}
 
   /* Galaxie: 22 000 Teilchen in Spiralarmen, rotiert im Shader */
-  const N=22000,pos=new Float32Array(N*3),col=new Float32Array(N*3),sz=new Float32Array(N),spd=new Float32Array(N);
+  const N=mob?9000:22000,pos=new Float32Array(N*3),col=new Float32Array(N*3),sz=new Float32Array(N),spd=new Float32Array(N);
   const cA=new THREE.Color('#8c6bd6'),cB=new THREE.Color('#c0608f'),cC=new THREE.Color('#5cc8ff'),tmp=new THREE.Color();
   for(let i=0;i<N;i++){
     const arm=i%4,rad=2.4+Math.pow(Math.random(),1.6)*22,ang=arm/4*Math.PI*2+rad*.32+(Math.random()-.5)*.9*(1+rad*.04);
@@ -425,7 +448,10 @@ const World=(function(){
   const P=new THREE.Vector3(),L=new THREE.Vector3(),cur=new THREE.Vector3(0,0,6),curL=new THREE.Vector3();
   let prog=0,vel=0,mx=0,my=0,boost=0,fit=1;
   addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
-  function size(){const w=innerWidth,h=innerHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();comp&&comp.setSize(w,h);fit=Math.max(1,1.05/cam.aspect);K[0].pos.z=7*fit;K[K.length-1].pos.z=8*fit}
+  let lastW=0,lastH=0;
+  function size(){const w=innerWidth,h=innerHeight;
+    if(mob&&w===lastW&&Math.abs(h-lastH)<160)return; /* Adressleiste ein/aus: kein Neuaufbau */
+    lastW=w;lastH=h;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();comp&&comp.setSize(w,h);if(mob&&bloom)bloom.setSize(w/2,h/2);fit=Math.max(1,1.05/cam.aspect);K[0].pos.z=7*fit;K[K.length-1].pos.z=8*fit}
   addEventListener('resize',size);size();
   function sample(p){let i=0;while(i<K.length-2&&p>K[i+1].p)i++;const a=K[i],b=K[i+1],t=ease(clamp((p-a.p)/(b.p-a.p),0,1));
     P.lerpVectors(a.pos,b.pos,t);L.lerpVectors(a.look,b.look,t)}
