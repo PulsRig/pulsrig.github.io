@@ -229,7 +229,7 @@ body.pre-intro .hero>*{transform:translateY(30px) scale(.94);filter:blur(8px)}
       <b>SCAN</b><small id="scanSub">Jetzt ausprobieren</small>
     </button>
     <div class="below">
-      <div class="found" id="found"><i></i><span id="foundText">4 neuere Treiber gefunden</span></div>
+      <div class="found" id="found"><i></i><span id="foundText">Probier den SCAN aus (Beispiel)</span></div>
       <div class="cta">
         <a class="btn primary" href="https://github.com/PulsRig/PulsRig/releases/latest/download/PulsRig-Setup-1.0.exe">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
@@ -242,9 +242,9 @@ body.pre-intro .hero>*{transform:translateY(30px) scale(.94);filter:blur(8px)}
 
   <section class="chapters" id="chapters" aria-label="Was PulsRig macht">
     <div class="pin">
-      <div class="chap on"><div class="num">188</div><div class="k">KAPITEL 1 · SCAN</div><h2>188 Geräte. Ein Herzschlag.</h2><p>Windows Update, NVIDIA, AMD und der Microsoft-Katalog in einem einzigen Durchlauf.</p></div>
+      <div class="chap on"><div class="num">1×</div><div class="k">KAPITEL 1 · SCAN</div><h2>Alle Geräte. Ein Herzschlag.</h2><p>Windows Update, NVIDIA, AMD und der Microsoft-Katalog in einem einzigen Durchlauf.</p></div>
       <div class="chap"><div class="num">°C</div><div class="k">KAPITEL 2 · LIVE</div><h2>Jedes Grad. Jedes Megahertz.</h2><p>Temperatur, Takt und Auslastung in Echtzeit, auch unter Volllast im Stabilitätstest.</p></div>
-      <div class="chap"><div class="num">92</div><div class="k">KAPITEL 3 · BOOST</div><h2>Wenn das Spiel startet, wird es still.</h2><p>Unnötige Dienste pausieren. Der Gaming-Check zeigt, was noch bremst.</p></div>
+      <div class="chap"><div class="num">FPS</div><div class="k">KAPITEL 3 · BOOST</div><h2>Wenn das Spiel startet, wird es still.</h2><p>Unnötige Dienste pausieren. Der Gaming-Check zeigt, was noch bremst.</p></div>
       <div class="chap"><div class="num">USB</div><div class="k">KAPITEL 4 · SCHUTZ</div><h2>Nichts geht verloren.</h2><p>Grafiktreiber gesperrt gegen Windows Update, alle Treiber auf dem Notfall-Stick.</p></div>
       <div class="prog" aria-hidden="true"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
     </div>
@@ -469,7 +469,7 @@ const World=(function(){
     const ph=(t%.9)/.9,beat=Math.exp(-Math.pow((ph-.05)/.035,2))+.6*Math.exp(-Math.pow((ph-.22)/.045,2));
     ring.scale.setScalar(ringS*(1+beat*.008+boost*.03));core.material.opacity=.09+beat*.06+boost*.2;
     if(bloom)bloom.strength=1.0+beat*.08+boost*.45+vel*3;
-    waves.forEach((m,i)=>{m.userData.t+=dt;const k=m.userData.t/1.6;m.scale.setScalar(1+k*5);m.material.opacity=Math.max(0,1-k)*.35;if(k>=1){ring.remove(m);waves.splice(i,1)}});
+    for(let i=waves.length-1;i>=0;i--){const m=waves[i];m.userData.t+=dt;const k=m.userData.t/1.6;m.scale.setScalar(1+k*5);m.material.opacity=Math.max(0,1-k)*.35;if(k>=1){ring.remove(m);m.geometry.dispose();m.material.dispose();waves.splice(i,1)}}
     gt+=dt*(1+boost*.8);galU.uTime.value=gt+prog*30;galU.uWarp.value=vel*8;
     vel*=.9;boost=Math.max(0,boost-dt*.45);
     comp?comp.render():r.render(scene,cam);
@@ -504,9 +504,9 @@ const World=(function(){
 /* ===== SCAN zum Ausprobieren ===== */
 (function(){
   const btn=document.getElementById('scan'),sub=document.getElementById('scanSub'),found=document.getElementById('found'),ft=document.getElementById('foundText');let busy=false;
-  btn.addEventListener('click',()=>{if(busy)return;busy=true;World&&World.scan();Sound&&Sound.scan();found.style.opacity=.3;let n=0;
-    const iv=setInterval(()=>{n+=Math.ceil(Math.random()*12);sub.textContent=Math.min(n,188)+' Geräte geprüft';
-      if(n>=188){clearInterval(iv);sub.textContent='Erneut prüfen';ft.textContent='4 neuere Treiber · 188 Geräte (Beispiel)';found.style.opacity=1;busy=false;World&&World.scan()}},55)});
+  btn.addEventListener('click',()=>{if(busy)return;busy=true;World&&World.scan();typeof Sound!=='undefined'&&Sound.scan();found.style.opacity=.3;let n=0;const total=90+Math.floor(Math.random()*140),upd=Math.floor(Math.random()*6);
+    const iv=setInterval(()=>{n+=Math.ceil(Math.random()*12);sub.textContent=Math.min(n,total)+' Geräte geprüft';
+      if(n>=total){clearInterval(iv);sub.textContent='Erneut prüfen';ft.textContent=(upd?upd+(upd>1?' neuere Treiber':' neuerer Treiber'):'Alles aktuell')+' · '+total+' Geräte (Beispiel, je PC anders)';found.style.opacity=1;busy=false;World&&World.scan()}},55)});
 })();
 
 /* ===== Live-Kurven mit Beispielwerten ===== */
